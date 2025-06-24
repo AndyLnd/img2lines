@@ -19,6 +19,10 @@ export async function imgToCanvas(
 ): Promise<CanvasRenderingContext2D> {
   const ctx = createCanvas(size);
   const img = await loadImage(imgFile);
-  ctx.drawImage(img, 0, 0);
+  const { width, height } = img;
+  const diff = width - height;
+  const [offX, offY] = diff > 0 ? [diff / 2, 0] : [0, -diff / 2];
+  const sSize = Math.min(width, height);
+  ctx.drawImage(img, offX, offY, sSize, sSize, 0, 0, size, size);
   return ctx;
 }

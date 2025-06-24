@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getBestVariant, nextNodeAll } from "$lib";
+  import { allOtherNodes, getBestFit } from "$lib";
   import { getGreyValues, maxContrast } from "$lib/calc";
   import { clear, renderLines } from "$lib/render";
   import { createCanvas, imgToCanvas } from "$lib/util";
@@ -18,6 +18,7 @@
     const file = files[0];
     const imgCtx = await imgToCanvas(file, size);
     const inputCtx = inputCanvas.getContext("2d")!;
+    clear(inputCtx);
     inputCtx.drawImage(imgCtx.canvas, 0, 0);
     const imgValues = maxContrast(getGreyValues(imgCtx));
     const varCtx = createCanvas(size);
@@ -25,15 +26,16 @@
     const nodes = [0];
     while (nodes.length < lineCount) {
       const currentNode = (nodes as any).at(-1);
-      const variants = nextNodeAll(nodeCount, currentNode);
-      const nextNodes = getBestVariant(
+      const otherNodes = allOtherNodes(nodeCount, nodes, currentNode);
+      const nextNode = getBestFit(
         nodeCount,
         nodes,
-        variants,
+        otherNodes,
         varCtx,
         imgValues
       );
-      nodes.push(...nextNodes);
+      nodes.push(nextNode);
+
       if (nodes.length % animationStep === 0) {
         await new Promise(requestAnimationFrame);
         progressDiv.textContent = `${nodes.length} / ${lineCount}`;
@@ -41,9 +43,10 @@
         renderLines(outputCtx, nodeCount, nodes, 1);
       }
     }
+
+    progressDiv.textContent = `done`;
     clear(outputCtx);
     renderLines(outputCtx, nodeCount, nodes, 1);
-    console.log("done");
   }
 </script>
 
@@ -59,13 +62,13 @@
     <button
       class="bg-emerald-200 p-2 border border-emerald-800 rounded min-w-2xs disabled:opacity-50"
       on:click={start}
-      disabled={files?.length < 1}
-      >go</button
+      disabled={files?.length < 1}>go</button
     >
   </div>
   <div bind:this={progressDiv}></div>
   <div class="flex items-center">
     <canvas bind:this={inputCanvas} width={size} height={size}></canvas>
-    <canvas bind:this={outputCanvas} width={size * 3} height={size * 3}></canvas>
+    <canvas bind:this={outputCanvas} width={size * 3} height={size * 3}
+    ></canvas>
   </div>
 </div>
