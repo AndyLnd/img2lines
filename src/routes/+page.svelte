@@ -24,8 +24,9 @@
     const varCtx = createCanvas(size);
     const outputCtx = outputCanvas.getContext("2d")!;
     const nodes = [0];
+    const startTime = performance.now();
     while (nodes.length < lineCount) {
-      const currentNode = (nodes as any).at(-1);
+      const currentNode = nodes.at(-1)!;
       const otherNodes = allOtherNodes(nodeCount, nodes, currentNode);
       const nextNode = getBestFit(
         nodeCount,
@@ -43,8 +44,8 @@
         renderLines(outputCtx, nodeCount, nodes, 1);
       }
     }
-
-    progressDiv.textContent = `done`;
+    const totalTime = (performance.now() - startTime)/1000 ;
+    progressDiv.textContent = `done in ${totalTime.toFixed(3)} seconds`;
     clear(outputCtx);
     renderLines(outputCtx, nodeCount, nodes, 1);
   }

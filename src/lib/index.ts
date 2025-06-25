@@ -40,9 +40,14 @@ export function getBestFit(
   varCtx: CanvasRenderingContext2D,
   imgValues: Uint8ClampedArray
 ) {
+  clear(varCtx);
+  renderLines(varCtx, nodeCount, nodes, 0.2);
+  var linesBufiData = varCtx.getImageData(0,0,varCtx.canvas.width, varCtx.canvas.height);
+
+  const lastNode = nodes.at(-1)!;
   const variDiffs = varis.map((vari) => {
-    clear(varCtx);
-    renderLines(varCtx, nodeCount, [...nodes, vari], 0.2);
+    varCtx.putImageData(linesBufiData,0,0);
+    renderLines(varCtx, nodeCount, [lastNode, vari], 0.2);
     const varValues = getGreyValues(varCtx);
     return squareDiffSum(varValues, imgValues);
   });
